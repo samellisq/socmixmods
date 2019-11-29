@@ -1,0 +1,23 @@
+Package: socmixmods
+Type: Package
+Title: Fitting Binomial Mixture Models to Social Data
+Version: 0.1.0
+Authors@R: c(
+    person("Michael", "Weiss", email = "myemailaddress@weiss.com", role = c("aut")),
+    person("Samuel", "Ellis", email = "samellisq@gmail.com", role = c("aut", "cre")))
+Description: A package to fit k component binomial mixture models to 
+    social association data. Fitted binomial mixture models can be used
+    to assess social complexity (e.g Weiss et al. ...) or categorise
+    social bonds (e.g. Ellis et al... UPCOMING). Package provides functions
+    to fit and assess the fit of k-component mixture models. It also provides
+    other related functions likely to be of use when working with mixture 
+    models of on social data. Based on alogrithins described in Weiss et al ...
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.0.1
+Depends: R (>= 3.6.1)
+Imports: 
+    VGAM
+Suggests: 
+    testthat (>= 2.1.0)
