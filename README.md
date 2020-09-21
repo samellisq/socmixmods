@@ -27,7 +27,8 @@ Weiss:
 You can install the released version of socmixmods from [CRAN](https://CRAN.R-project.org) with:
 
 ``` r
-install.packages("socmixmods")
+install.packages("devtools")
+devtools::install_github("samellisq/socmixmods")
 ```
 
 ## Example
