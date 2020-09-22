@@ -2,10 +2,18 @@
 % Please edit documentation in R/mixmodel_functions.R
 \name{fit_binom_mixture_model}
 \alias{fit_binom_mixture_model}
-\title{Fit a \code{J} component binomial mixture model}
+\title{Fit a J component binomial mixture model}
 \usage{
-fit_binom_mixture_model(Den, Num, J, maxiter = 1000, maxrep = 50,
-  tolfun = 1e-06, minprior = 0)
+fit_binom_mixture_model(
+  Den,
+  Num,
+  J,
+  edge.ids = NULL,
+  maxiter = 1000,
+  maxrep = 50,
+  tolfun = 1e-06,
+  minprior = 0
+)
 }
 \arguments{
 \item{Den}{A numeric vector of the association index denominator.}
@@ -13,6 +21,9 @@ fit_binom_mixture_model(Den, Num, J, maxiter = 1000, maxrep = 50,
 \item{Num}{A numeric vector of the association index numerator.}
 
 \item{J}{Integer number of components to fit.}
+
+\item{edge.ids}{String vector of edge names. If \code{NULL} (default) then
+names will be created and applied within the function.}
 
 \item{maxiter}{Number of iterations. Default input = 1000.}
 
@@ -23,58 +34,49 @@ fit_binom_mixture_model(Den, Num, J, maxiter = 1000, maxrep = 50,
 \item{minprior}{Something else again. Default input = 0.}
 }
 \value{
-Output is a list with the elements (accessed via index \code{[i]} or
-\code{$element.name}): \cr \cr
-\code{K.in} Number of components aimed to be fitted (will match input \code{J}).
-Integer. \cr \cr
-\code{K.out} Number of components fitted by the model. Returned as a sanity check.
-Should match \code{K.in} & \code{J}.
-\code{Mean} Mean association rates of the fitted componenets Numeric vector of
-length \code{J}. \cr \cr
-\code{Frequency} ? \cr \cr
-\code{S} Shannons Entropy. Numeric. \cr \cr
-\code{rho} ? \cr \cr
-\code{logLik}Log-likelhood of the fitted model. \cr \cr
-\code{BIC} Model Baysien Information Criteria \cr \cr
-\code{AIC} Model Akalie Information Criteria. \cr \cr
-\code{ICL} Model Inform... \cr \cr
-\code{nrep} ? \cr \cr
-\code{mu} Probability that each association in the data (rows) belongs to each
-fitted component (1-\code{K}: columns). If provided row names will be carried through
-from \code{names(Y)} and/or \code{names(x)}
+Output is an object of the class \code{socmixmod_model}. Features of the
+model can be accessed with the \code{summary}, \code{plot}, and
+\code{by_edge} functions.
+
+All model output can additionally be accessed by treating the output as a list
+(i.e. via \code{$} or \code{[[]]}). The output list contains the following
+elements:
+
+\itemize{
+ \item \code{K.in} Integer of components aimed to be fitted
+ (will match input \code{J}).
+ \item \code{K.out} Integer number of components fitted by the model. Returned as a
+ sanity check. Should match \code{K.in} & \code{J}.
+ \item{Denominators}. numeric vector \code{den} as Inputted.
+ \item{Numerators} Numeric vector \code{Num} as inputted
+ \item \code{Mean} Numeric vector of the mean association rates of the \code{J}
+ fitted components.
+ \item \code{Frequency} Numeric vector indicating the proportion of
+ associations in the population belonging to each component.
+ \item \code{S} Shannons' Entropy (social complexity measure)
+ \item \code{rho} Numeric realised overdispersion parameter.
+ \item \code{logLik} Model log-likelhood
+ \item \code{BIC} Model Baysien Information Criteria
+ \item \code{AIC} Model Akalie Information Criteria.
+}
 }
 \description{
-\code{fit_binom_mixture_model} fits a \code{J} component mixture model to social association
+\code{fit_binom_mixture_model} fits a J component mixture model to social association
 data. This function will usually be only called through \code{\link{binom_assoc_mixt}} but it
 can be used as a stand-alone function.
 }
 \examples{
-# Generate simulated social data with a known number of components and sampling effort
-K = 3 # number of types (K/J)
-N = 20 # number of individuals
-N.dyad = (N*(N-1))/2 #number of dyads
-mean.d = 80 #sampling effort
-bad.par = T
-while(bad.par){
-  mu = runif(K,0,1)
-  a = runif(K,0,1)
-  a = a/sum(a)
-  if(min(dist(mu))>=0.1 & min(a)>=0.1/K) bad.par = F
-}
-rho = runif(K,0,0.015) #overdispersion
-b1 = mu*(1/rho - 1) #shape parameters from means and overdispersion
-b2 = ((mu-1)*(rho-1))/rho
-k = sample(K, size = N.dyad, rep = T, prob = a) #assign classes
-p = rbeta(n=N.dyad,shape1=b1[k],shape2=b2[k]) #assign association probabilities
-d = rpois(N.dyad,mean.d) #assign denominators
-x = rbinom(n=N.dyad,size=d,prob=p) #assign numerators
-names(d) = as.roman(seq(1,length(d),1)) #Add edge names
-names(x) = as.roman(seq(1,length(x),1)) # Add edge names
+#simulate data
+dat = socmixmod_simulate_data()
 
 # Run model
-fitted.model = fit_binom_mixture_model(Den = d, Num = x, J = 5)
+fitted.model =
+fit_binom_mixture_model(Den = dat$d, Num = dat$n, J = dat$K, edge.ids = dat$edge.ids)
 
-
+#View output
+fitted.model
+summary(fitted.model)
+by_edge(fitted.model)
 
 }
 \seealso{

@@ -1,5 +1,5 @@
 ## Updates the Documentation (ie runs roxygen 2) Must be run before any changes to doumentation will take effect
-#devtools::document() this needs to be run in the console to update the docuemnation
+# devtools::document() #this needs to be run in the console to update the docuemnation
 
 ##Adds the package to the imports section of the DESCRIPTION. Does not add any version information
 #usethis::use_package("PACKAGENAME")
@@ -17,5 +17,5 @@
 #devtools::use_vignette("Intro to nhsnumbergenerator")
 
 ##Load the package
-#devtools::load_all()
+# devtools::load_all()
 

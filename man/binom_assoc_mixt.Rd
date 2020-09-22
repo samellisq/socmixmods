@@ -4,8 +4,16 @@
 \alias{binom_assoc_mixt}
 \title{Fit Binomial mixture models to  social association data}
 \usage{
-binom_assoc_mixt(Den, Num, minJ = 1, maxJ = 9, nrep = 20,
-  criterion = "ICL", run.all.J = FALSE)
+binom_assoc_mixt(
+  Den,
+  Num,
+  edge.ids = NULL,
+  minJ = 1,
+  maxJ = 9,
+  nrep = 20,
+  criterion = "ICL",
+  run.all.J = FALSE
+)
 }
 \arguments{
 \item{Den}{A numeric vector of the association index denominator.}
@@ -14,7 +22,7 @@ binom_assoc_mixt(Den, Num, minJ = 1, maxJ = 9, nrep = 20,
 
 \item{minJ}{Integer. Minimum component model to fit to the data. Default = \code{1}.}
 
-\item{maxJ}{Integer. Maximum componenet model to fit to the data. Default = \code{9}.}
+\item{maxJ}{Integer. Maximum component model to fit to the data. Default = \code{9}.}
 
 \item{nrep}{Something}
 
@@ -26,23 +34,38 @@ and \code{maxJ}. If \code{FALSE} [default], when two component-models in a row f
 \code{criterion}) stops the analysis and returns output.}
 }
 \value{
-Output is a list with elements (access via index or \code{$element.name}): \cr \cr
-\code{summary}. A summary table (data frame) summarising the fitted models. Each row is a model
-fitted with J components with columns:
-\itemize{
+Object of class \code{socmixmod_fittedmodels}.Features of the
+model can be accessed with the \code{summary} and
+\code{get_bestmodel} functions.
+
+In addition, the output can be treated as a list. The output list has two
+elements.
+
+\enumerate{
+\item \code{summary.table} A matrix of summary information from all fitted
+models. See also \code{summary(MODEL)}. Each row is a model
+fitted with k components with columns:
+ \itemize{
  \item \code{K.in}: Input number of components \code{J}
- \item \code{K.out}: Number of components fitted by the model (should match \code{K.in}).
+ \item \code{K.out}: Number of components fitted by the model
+ (sanity check, should match \code{K.in}).
  \item \code{S}: Shannon's Entropy.
- \item \code{rho}: Something
+ \item \code{rho}: Overdispersion parameter
  \item \code{AIC}: Model AIC
  \item \code{BIC}: Model BIC
  \item \code{ICL}: Model ICL
 }
-\code{all.models} Output from all models (see \code{\link{fit_binom_mixture_model}})
-in order from \code{minJ} to \code{maxJ} as list.
-\cr \cr
-\code{best.model} The output from the best fitting model, selected via \code{criterion}. Output
-is list output from \code{\link{fit_binom_mixture_model}}.
+
+\item \code{all.models}. A list of length \code{max(k)}. Each element in the
+list is a \code{socmixmod_model} class object outputted from
+\code{fit_binom_mixture_model}. List is in ascending order from \code{minJ}.
+See also \code{get_bestmodel(OUTPUT)} to extract the best model from the list.
+Note this can also be done by simply selecting the index of the best mode
+from this list: \code{OUTPUT$all.models[[best.model.index]]}
+
+\item \code{criteria} Criteria inputted by the user used to select the best
+model.
+}
 }
 \description{
 This function fits up to \code{maxJ} binomial mixture models to social data. Returning a summary
@@ -51,33 +74,16 @@ Where J > 1 this calls function \code{fit_binom_mixture_model}. Where J = 1, fit
 (non-mixture) binomial model. If minJ=maxJ a single model is run.
 }
 \examples{
-# Generate simulated social data with a known number of components and sampling effort
-K = 3 # number of types (K/J)
-N = 20 # number of individuals
-N.dyad = (N*(N-1))/2 #number of dyads
-mean.d = 80 #sampling effort
-bad.par = T
-while(bad.par){
-  mu = runif(K,0,1)
-  a = runif(K,0,1)
-  a = a/sum(a)
-  if(min(dist(mu))>=0.1 & min(a)>=0.1/K) bad.par = F
-}
-rho = runif(K,0,0.015) #overdispersion
-b1 = mu*(1/rho - 1) #shape parameters from means and overdispersion
-b2 = ((mu-1)*(rho-1))/rho
-k = sample(K, size = N.dyad, rep = T, prob = a) #assign classes
-p = rbeta(n=N.dyad,shape1=b1[k],shape2=b2[k]) #assign association probabilities
-d = rpois(N.dyad,mean.d) #assign denominators
-x = rbinom(n=N.dyad,size=d,prob=p) #assign numerators
-names(d) = as.roman(seq(1,length(d),1)) #Add edge names
-names(x) = as.roman(seq(1,length(x),1)) # Add edge names
+#simulate data
+dat = socmixmod_simulate_data()
 
-#Run the models, stopping when best fitting model is reached.
-model.fit = binom_assoc_mixt(Den = d,Num = x,criterion="ICL")
-model.fit$summary
+# Run model
+model.fitting =
+binom_assoc_mixt(Den = dat$d, Num = dat$n, edge.ids = dat$edge.ids, run.all.J = TRUE)
 
-#Run all models, between minJ and maxJ
-model.fit = binom_assoc_mixt(Den = d, Num = x, minJ = 1, maxJ = 9, run.all.J = TRUE, criterion="ICL")
-model.fit$summary
+#View output
+model.fitting
+summary(model.fitting)
+best.mod = get_bestmodel(model.fitting)
+summary(best.mod)
 }
