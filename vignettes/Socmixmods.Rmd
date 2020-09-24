@@ -1,0 +1,143 @@
+---
+title: "Socmixmods"
+author: "Samuel Ellis"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Socmixmods}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Introduction
+
+Socmixmods is a package designed to facilitate researchers applying binomial mixture models to social data. The use of binomial mixture models in social data was introduced in the paper: Weiss MN, Franks DW, Croft DP, Whitehead H (2019) *Measuring the complexity of social associations using mixture models.* Behav Ecol Sociobiol (https://doi.org/10.1007/s00265-018-2603-6). This package is an implementation of the methods developed in this paper, indeed it is partly based upon the R code published alongside the paper. A detailed description of the methods and the motivation for using them can be found in this publication. In addition functionality introduced in [Ellis et al upcoming paper] is also included, and again a detailed description of those methods and their application can be found in that publication. This document is intended as a brief guide to how to apply the package to social data.
+
+## Installing socmixmods
+Socmixmods is available on github at : https://github.com/samellisq/socmixmods. 
+
+To download from github I recommend the functionality in the devtools package but other methods will also work. 
+
+```{r, eval = FALSE}
+install.packages("devtools") # install devtools if not already installed (also avaliable on CRAN)
+devtools::install_github("samellisq/socmixmods")
+
+library(socmixmods)
+
+```
+
+## Data
+
+In a binomial mixture model of social data we assume that the number of times two individuals (*i* and *j*) are seen together (x~ij~) is the result of the number of times both members of the pair are observed (d~ij~) and their real social preference *mu*~ij~. Hence:  x~ij~ ~ binomial(d~ij~, *mu*~ij~). In social network terms *x* and *d* represent the numerator and demonator (respectively) of the commonly used Simple Ratio Index. 
+
+The input data for the binomial mixture models is therefore a numeric vector of the denominator and numerator of the Simple Ratio Index. 
+
+```{r, echo = FALSE, message=FALSE}
+devtools::load_all()
+
+dat = socmixmod_simulate_data(K = 4, mean.d = 120)
+x = dat$n
+d = dat$d
+edge.ids = dat$edge.ids
+
+```
+```{r}
+head(data.frame(x, d))
+```
+
+In addition for analysis aiming to classifying edges into components (or other edge based analyses) it is useful to have a vector of names for the edges to faciliate linking the output back to data. These edge ids can either be a vector of edge names (or a key value) or a two column matrix of names of the nodes being connected by the edge. If edge ids are not supplied edges are named sequentially. 
+
+```{r}
+head(data.frame(x, d, edge.ids))
+```
+
+NB: data used here and throughout are simulated via the socmixmod_simulate_data() function explained below. 
+
+## Fitting a model: the **fit_binom_mixture_model** function
+
+The fit_binom_mixture_model function fits a binomial mixture model of K components
+to the data. 
+
+```{r}
+model = fit_binom_mixture_model(Den = d,
+                                Num = x, 
+                                J = 3, 
+                                edge.ids = edge.ids 
+                                )
+```
+
+A summary of the model can be accessed with:
+
+```{r}
+summary(model)
+```
+
+And the edge data, the probability that each edge belongs in each component, can be accessed with:
+```{r}
+edge.data = by_edge(model)
+head(edge.data)
+```
+
+Summary information and edge data can be accessed by treating the output as a list
+
+```{r}
+head(model$mu) # for edge data
+```
+
+
+Lastly, a plot showing how the components fit onto the social association Simple Ratio Index can be accessed with (note ggplot2 package required):
+
+```{r}
+plot(model)
+```
+
+Please note that this plot is just for guidance as the model does not actually fit to the Simple Ratio Index rather it fits to the data itself. 
+
+## How many componenents?: the *binom_assoc_mixt* function
+
+Researchers will often want to select the number of components that best fits the data. Socmixmods includes the binom_assoc_mixt function to facilitate this. 
+
+```{r}
+model.fitting = binom_assoc_mixt(Den = d, 
+                                 Num = x, 
+                                 edge.ids = edge.ids, 
+                                 minJ = 1,
+                                 maxJ = 5,
+                                 criterion = "AIC",
+                                 run.all.J = TRUE,
+                                 verbose = FALSE
+                                )
+```
+
+This function will the fit, in this case, 5 binomial mixture models to the data: from minJ to
+maxJ components. The *run.all.J* parameter specifies whether to run all the models with between minJ and maxJ components (when *TRUE*), or to stop running the model when 2 models in a row have an increasing *criterion* (when *FALSE*). This is particualry pertinent because models with a large number of components can be slow to fit. 
+
+A summary of all 5 models can be accessed via:
+
+```{r}
+summary(model.fitting)
+```
+
+Each model can be individually viewed by using the $all.models. Each model is produced by the fit_binom_mixture_model function and the same manipulations as described above can be applied:
+
+```{r}
+summary(model.fitting$allmodels.list[[4]])
+```
+
+And the best fitting model, selected by *criterion*, can be extracted directly with:
+
+```{r}
+best.model = get_bestmodel(model.fitting, verbose = FALSE)
+summary(best.model)
+```
+
+
+
+

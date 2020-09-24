@@ -6,6 +6,10 @@
 \usage{
 \method{summary}{socmixmod_fittedmodels}(obj)
 }
+\value{
+Displayed values are rounded for clarity but unrounded values are returned in
+the raw summary output: obj$summary
+}
 \description{
 Summary generic method for socmixmod_fittedmodels
 }

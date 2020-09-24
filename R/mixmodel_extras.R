@@ -36,7 +36,11 @@ socmixmod_simulate_data = function(
     mu = runif(K,0,1)
     a = runif(K,0,1)
     a = a/sum(a)
+    if(K>1){
     if(min(dist(mu))>=0.1 & min(a)>=0.1/K) bad.par = F
+    } else {
+      if(min(a)>=0.1/K) bad.par = F
+    }
   }
   rho = runif(K,0,0.015) #overdispersion
   b1 = mu*(1/rho - 1) #shape parameters from means and overdispersion
@@ -120,6 +124,8 @@ by_edge = function(obj){
 #'\code{binom_assoc_mixt} function/
 #'
 #'@param obj  socmixmod_fittedmodels class object
+#'@param verbose Logical. If TRUE displays summary information from the best fitting
+#'model when applied. Default=TRUE.
 #'
 #'@return A socmixmodel_model of the best fitting model as specified by the
 #'\code{criterion} choosen for model fitting.
@@ -141,9 +147,11 @@ by_edge = function(obj){
 #'@seealso
 #'binom_assoc_mixt
 #'
-get_bestmodel = function(obj){
+get_bestmodel = function(obj, verbose = TRUE){
   bestmod.i = which.min(obj$summary[,obj$fitting.criteria])
   bestmod = obj$all.models[[bestmod.i]]
-  summary(bestmod)
+  if(verbose == TRUE){
+    summary(bestmod)
+  }
   return(bestmod)
 }

@@ -8,11 +8,12 @@ binom_assoc_mixt(
   Den,
   Num,
   edge.ids = NULL,
-  minJ = 1,
-  maxJ = 9,
-  nrep = 20,
+  minK = 1,
+  maxK = 9,
   criterion = "ICL",
-  run.all.J = FALSE
+  run.all.K = FALSE,
+  verbose = TRUE,
+  ...
 )
 }
 \arguments{
@@ -20,18 +21,23 @@ binom_assoc_mixt(
 
 \item{Num}{A numeric vector of the association index numerator.}
 
-\item{minJ}{Integer. Minimum component model to fit to the data. Default = \code{1}.}
+\item{minK}{Integer. Minimum component model to fit to the data. Default = \code{1}.}
 
-\item{maxJ}{Integer. Maximum component model to fit to the data. Default = \code{9}.}
-
-\item{nrep}{Something}
+\item{maxK}{Integer. Maximum component model to fit to the data. Default = \code{9}.}
 
 \item{criterion}{String. Model fitting criteria to use to choose best model.
 Categorical, options are \code{"ICL"}[default], \code{"AIC"} & \code{"BIC"}.}
 
-\item{run.all.J}{Logical. If \code{TRUE} fits all component models between \code{minJ}
-and \code{maxJ}. If \code{FALSE} [default], when two component-models in a row fit less well (by
+\item{run.all.K}{Logical. If \code{TRUE} fits all component models between \code{minK}
+and \code{maxK}. If \code{FALSE} [default], when two component-models in a row fit less well (by
 \code{criterion}) stops the analysis and returns output.}
+
+\item{verbose}{Logical indicating whether to print progress messages as models
+run (default = TRUE).}
+
+\item{...}{Expectation maximisation parameters - \code{maxiter, maxrep,
+tolfun, minprior} - inherited from \code{\link{fit_binom_mixture_model}}. Defaults
+used if unspecified.}
 }
 \value{
 Object of class \code{socmixmod_fittedmodels}.Features of the
@@ -46,9 +52,9 @@ elements.
 models. See also \code{summary(MODEL)}. Each row is a model
 fitted with k components with columns:
  \itemize{
- \item \code{K.in}: Input number of components \code{J}
+ \item \code{K.in}: Input number of components \code{K}
  \item \code{K.out}: Number of components fitted by the model
- (sanity check, should match \code{K.in}).
+ (sanity check, should match \code{K.in}). BUT SEE MINPRIOR DESCRIPTION.
  \item \code{S}: Shannon's Entropy.
  \item \code{rho}: Overdispersion parameter
  \item \code{AIC}: Model AIC
@@ -58,7 +64,7 @@ fitted with k components with columns:
 
 \item \code{all.models}. A list of length \code{max(k)}. Each element in the
 list is a \code{socmixmod_model} class object outputted from
-\code{fit_binom_mixture_model}. List is in ascending order from \code{minJ}.
+\code{fit_binom_mixture_model}. List is in ascending order from \code{minK}.
 See also \code{get_bestmodel(OUTPUT)} to extract the best model from the list.
 Note this can also be done by simply selecting the index of the best mode
 from this list: \code{OUTPUT$all.models[[best.model.index]]}
@@ -68,10 +74,10 @@ model.
 }
 }
 \description{
-This function fits up to \code{maxJ} binomial mixture models to social data. Returning a summary
+This function fits up to \code{maxK} binomial mixture models to social data. Returning a summary
 of the fit of each model and the output of the best fitting model. \cr \cr
-Where J > 1 this calls function \code{fit_binom_mixture_model}. Where J = 1, fits a standard
-(non-mixture) binomial model. If minJ=maxJ a single model is run.
+Where K > 1 this calls function \code{fit_binom_mixture_model}. Where K = 1, fits a standard
+(non-mixture) binomial model. If minK=maxK a single model is run.
 }
 \examples{
 #simulate data
@@ -79,7 +85,7 @@ dat = socmixmod_simulate_data()
 
 # Run model
 model.fitting =
-binom_assoc_mixt(Den = dat$d, Num = dat$n, edge.ids = dat$edge.ids, run.all.J = TRUE)
+binom_assoc_mixt(Den = dat$d, Num = dat$n, edge.ids = dat$edge.ids, run.all.K = TRUE)
 
 #View output
 model.fitting

@@ -2,12 +2,12 @@
 % Please edit documentation in R/mixmodel_functions.R
 \name{fit_binom_mixture_model}
 \alias{fit_binom_mixture_model}
-\title{Fit a J component binomial mixture model}
+\title{Fit a K component binomial mixture model}
 \usage{
 fit_binom_mixture_model(
   Den,
   Num,
-  J,
+  K,
   edge.ids = NULL,
   maxiter = 1000,
   maxrep = 50,
@@ -20,21 +20,21 @@ fit_binom_mixture_model(
 
 \item{Num}{A numeric vector of the association index numerator.}
 
-\item{J}{Integer number of components to fit.}
+\item{K}{Integer number of components to fit.}
 
 \item{edge.ids}{String vector of edge names. If \code{NULL} (default) then
 names will be created and applied within the function.}
 
-\item{maxiter}{Number of iterations. Default input = 1000.}
+\item{maxiter}{Number of iterations for the Expectation Maximisation algorithm  Default input = 1000.}
 
-\item{maxrep}{Something. Default input = 50}
+\item{maxrep}{Maximum number of times to run Expectation Maximisation algorithm. Default input = 50}
 
-\item{tolfun}{Somehing else. Default input = 1e-06.}
+\item{tolfun}{Tolerance for likelihood maximisation. Default input = 1e-06.}
 
-\item{minprior}{Something else again. Default input = 0.}
+\item{minprior}{Minimum component probability to be included. Default input = 0.}
 }
 \value{
-Output is an object of the class \code{socmixmod_model}. Features of the
+Output is an obKect of the class \code{socmixmod_model}. Features of the
 model can be accessed with the \code{summary}, \code{plot}, and
 \code{by_edge} functions.
 
@@ -44,26 +44,46 @@ elements:
 
 \itemize{
  \item \code{K.in} Integer of components aimed to be fitted
- (will match input \code{J}).
+ (will match input \code{K}).
  \item \code{K.out} Integer number of components fitted by the model. Returned as a
- sanity check. Should match \code{K.in} & \code{J}.
+ sanity check. Should match \code{K.in} & \code{K}.
  \item{Denominators}. numeric vector \code{den} as Inputted.
  \item{Numerators} Numeric vector \code{Num} as inputted
- \item \code{Mean} Numeric vector of the mean association rates of the \code{J}
+ \item \code{Mean} Numeric vector of the mean association rates of the \code{K}
  fitted components.
  \item \code{Frequency} Numeric vector indicating the proportion of
  associations in the population belonging to each component.
- \item \code{S} Shannons' Entropy (social complexity measure)
- \item \code{rho} Numeric realised overdispersion parameter.
+ \item \code{S} Shannon's Entropy (social complexity measure)
+ \item \code{rho} Numeric estimated overdispersion parameter.
  \item \code{logLik} Model log-likelhood
  \item \code{BIC} Model Baysien Information Criteria
  \item \code{AIC} Model Akalie Information Criteria.
+ \item \code{ICL} Model Integrated Complete Liklehood
 }
 }
 \description{
-\code{fit_binom_mixture_model} fits a J component mixture model to social association
+\code{fit_binom_mixture_model} fits a K component mixture model to social association
 data. This function will usually be only called through \code{\link{binom_assoc_mixt}} but it
 can be used as a stand-alone function.
+}
+\details{
+The model uses Expectation Maximisation approach to estimate the model parameters.
+The algorithm is defined by the \code{maxiter}, \code{maxrep}, \code{tolfun}
+and \code{minprior} terms in the model. Decreasing \code{maxiter} and \code{maxrep}
+and increasing \code{tolfun} will reduce computational speed at the expense of
+model accuracy. \code{minprior} determines the minimum component probability
+for a component to be included in the model. \code{minprior = 0} means that
+components are never removed from the model even if there component probability
+is 0 (i.e. no social associations fall within that component). For most purposes
+we expect this to be the desired behavior. Increasing this parameter will
+mean that fitted K (\code{K.in}) may not match inputted \code{K} (\code{K.out}).
+
+It should also be noted that when K=1 a binomial model, rather than a binomial
+mixture model, is fitted to the data. THis single component model does not require
+an Expectation Maximisation so the parameters described in the paragraph above
+are not applied. Overdispersion (rho) is estimated from a beta-binomial
+with a fixed mean (the mean of the data). In addition, when K=1 Shannon's
+entropy is, by definition, always 0.
 }
 \examples{
 #simulate data
@@ -71,7 +91,7 @@ dat = socmixmod_simulate_data()
 
 # Run model
 fitted.model =
-fit_binom_mixture_model(Den = dat$d, Num = dat$n, J = dat$K, edge.ids = dat$edge.ids)
+fit_binom_mixture_model(Den = dat$d, Num = dat$n, K = dat$K, edge.ids = dat$edge.ids)
 
 #View output
 fitted.model

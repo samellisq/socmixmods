@@ -4,10 +4,13 @@
 \alias{get_bestmodel}
 \title{Get the best model method from a  socmixmod_fittedmodels object}
 \usage{
-get_bestmodel(obj)
+get_bestmodel(obj, verbose = TRUE)
 }
 \arguments{
 \item{obj}{socmixmod_fittedmodels class object}
+
+\item{verbose}{Logical. If TRUE displays summary information from the best fitting
+model when applied. Default=TRUE.}
 }
 \value{
 A socmixmodel_model of the best fitting model as specified by the

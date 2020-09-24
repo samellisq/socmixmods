@@ -3,62 +3,68 @@ library(socmixmods)
 ## Generate some data
 #############################################################
 
-K = 3 # number of types (K/J)
-N = 20 # number of individuals
-N.dyad = (N*(N-1))/2 #number of dyads
-mean.d = 80 #sampling effort
-bad.par = T
-while(bad.par){
-  mu = runif(K,0,1)
-  a = runif(K,0,1)
-  a = a/sum(a)
-  if(min(dist(mu))>=0.1 & min(a)>=0.1/K) bad.par = F
-}
-rho = runif(K,0,0.015) #overdispersion
-b1 = mu*(1/rho - 1) #shape parameters from means and overdispersion
-b2 = ((mu-1)*(rho-1))/rho
-k = sample(K, size = N.dyad, rep = T, prob = a) #assign classes
-p = rbeta(n=N.dyad,shape1=b1[k],shape2=b2[k]) #assign association probabilities
-d = rpois(N.dyad,mean.d) #assign denominators
-x = rbinom(n=N.dyad,size=d,prob=p) #assign numerators
-names(d) = as.roman(seq(1,length(d),1)) #Add edge names
-names(x) = as.roman(seq(1,length(x),1)) # Add edge names
+sim.data = socmixmod_simulate_data()
 
 ################################################
-# Tests
+# Tests: fit_binnm_mixture_model
 ###################################################
 
 
-context("Check that incorrect inputs are rejected")
+context("Checking fit_binom_mixture_model")
 
-test_that("fit_binom_mixture_model incorrect inputs are rejected", {
-  expect_error(fit_binom_mixture_model(Den = as.character(d), Num = x, J = 3))
-  x.error = x
+test_that("Check incorrect inputs are rejected", {
+  expect_error(fit_binom_mixture_model(Den = as.character(sim.data$d), Num = x, K = 3))
+  x.error = sim.data$x
   x.error[1] = NA
-  expect_error(fit_binom_mixture_model(Den = d, Num = x.error, J = 3))
-  error.x = x
-  error.x = x + d
-  expect_error(fit_binom_mixture_model(Den = d, Num = x.error, J = 3))
-  expect_error(fit_binom_mixture_model(Den = d, Num = x, J = 3.1))
-  expect_error(fit_binom_mixture_model(Den = d, Num = x, J = -3))
+  expect_error(fit_binom_mixture_model(Den = d, Num = x.error, K = 3))
+  error.x = sim.data$x
+  error.x = sim.data$x + sim.data$d
+  expect_error(fit_binom_mixture_model(Den = d, Num = x.error, K = 3))
+  expect_error(fit_binom_mixture_model(Den = d, Num = x, K = 3.1))
+  expect_error(fit_binom_mixture_model(Den = d, Num = x, K = -3))
 
 })
+
+
+test_that("Check output is of the correct type",{
+  mod = fit_binom_mixture_model(Den = sim.data$d,
+                                Num = sim.data$n,
+                                K = 3,
+                                edge.ids = sim.data$edge.ids)
+  expect_match(class(mod), "socmixmod_model")
+
+})
+
+context("Checking binom_assoc_mixt")
 
 test_that("binom_assoc_mixt incorrect inputs are rejected", {
-  expect_error(binom_assoc_mixt(Den = d,Num = as.character(x),criterion="ICL"))
-  x.error = x
+  expect_error(binom_assoc_mixt(Den = sim.data$d,Num = as.character(sim.data$x),criterion="ICL"))
+  x.error = sim.data$x
   x.error[1] = NA
-  expect_error(binom_assoc_mixt(Den = d,Num = x.error,criterion="ICL"))
-  error.x = x
-  error.x = x + d
-  expect_error(binom_assoc_mixt(Den = d,Num = x.error,criterion="ICL"))
-  expect_error(binom_assoc_mixt(Den = d,Num = x, minJ = 5, maxJ = 2, criterion="ICL"))
-  expect_error(binom_assoc_mixt(Den = d,Num = x,criterion="ILC"))
-  expect_error(binom_assoc_mixt(Den = d,Num = x,criterion="ICL", run.all.J = TURE))
+  expect_error(binom_assoc_mixt(Den = sim.data$d,Num = sim.data$x.error,criterion="ICL"))
+  error.x = sim.data$x
+  error.x = sim.data$x + sim.data$d
+  expect_error(binom_assoc_mixt(Den = sim.data$d,Num = x.error,criterion="ICL"))
+  expect_error(binom_assoc_mixt(Den = sim.data$d,Num = sim.data$x, minK = 5, maxK = 2, criterion="ICL"))
+  expect_error(binom_assoc_mixt(Den = sim.data$d,Num = sim.data$x,criterion="ILC"))
+  expect_error(binom_assoc_mixt(Den = sim.data$d,Num = sim.data$x,criterion="ICL", run.all.K = TURE))
+})
+
+test_that("Check output is of the correct type",{
+  mod2 = binom_assoc_mixt(Den = sim.data$d,
+                          Num = sim.data$n,
+                          edge.ids = sim.data$edge.ids,
+                          minK = 1,
+                          maxK = 3,
+                          criterion = "ICL",
+                          run.all.K = TRUE,
+                          verbose = FALSE
+                          )
+  expect_match(class(mod2), "socmixmod_fittedmodels")
+  mod2.2 = mod2$all.models[[2]]
+  expect_match(class(mod2.2), "socmixmod_model")
+
 })
 
 
-context("context 2")
-test_that("multiplication works", {
-  expect_equal(2 * 2, 4)
-})
+
