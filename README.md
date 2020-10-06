@@ -10,5 +10,6 @@ Methods for implementing binomial mixed-effects models for social association da
 ``` r
 install.packages("devtools")
 devtools::install_github("samellisq/socmixmods")
+library(socmixmods)
 ```
 
