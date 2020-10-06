@@ -32,5 +32,4 @@ socmixmod functions. See Weiss et al 2019 for details.
 socmixmod_simulate_data()
 
 socmixmod_simulate_data(K = 5, N = 100, mean.d=50)
-
 }
