@@ -23,7 +23,7 @@
 #' socmixmod_simulate_data()
 #'
 #' socmixmod_simulate_data(K = 5, N = 100, mean.d=50)
-#'
+#'@export
 socmixmod_simulate_data = function(
   K = 3, # number of types (K/J)
   N = 20, # number of individuals
@@ -96,6 +96,8 @@ socmixmod_simulate_data = function(
 #' summary(fitted.model)
 #' by_edge(fitted.model)
 #'
+#'@export
+#'
 by_edge = function(obj){
 
   mu = obj$mu
@@ -146,6 +148,8 @@ by_edge = function(obj){
 #'
 #'@seealso
 #'binom_assoc_mixt
+#'
+#'@export
 #'
 get_bestmodel = function(obj, verbose = TRUE){
   bestmod.i = which.min(obj$summary[,obj$fitting.criteria])
