@@ -68,7 +68,7 @@ to the data.
 ```{r}
 model = fit_binom_mixture_model(Den = d,
                                 Num = x, 
-                                J = 3, 
+                                K = 3, 
                                 edge.ids = edge.ids 
                                 )
 ```
@@ -108,10 +108,10 @@ Researchers will often want to select the number of components that best fits th
 model.fitting = binom_assoc_mixt(Den = d, 
                                  Num = x, 
                                  edge.ids = edge.ids, 
-                                 minJ = 1,
-                                 maxJ = 5,
+                                 minK = 1,
+                                 maxK = 5,
                                  criterion = "AIC",
-                                 run.all.J = TRUE,
+                                 run.all.K = TRUE,
                                  verbose = FALSE
                                 )
 ```
